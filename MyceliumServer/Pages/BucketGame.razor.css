@@ -1,0 +1,19 @@
+#myGameArea {
+    width: 400px;
+    height: 400px;
+    position: relative;
+    background: yellow;
+  }
+  #myBucket {
+    width: 50px;
+    height: 25px;
+    position: absolute;
+    background-color: red;
+  }
+  #myPlayer{
+    width: 25px;
+    height: 26px;
+    position: absolute;
+    background-color: blue;
+    border-radius: 50px;
+  }
