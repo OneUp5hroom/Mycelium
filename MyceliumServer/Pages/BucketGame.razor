@@ -7,14 +7,48 @@
 </p>
 
 <div id="myGameArea">
+    <div id="winningPlayer">
+        @if(players.Count > 0) {
+            @if (@winningPlayer.PlayerId != "default") {
+                @if(@running) {
+                    <p>WINNING: @winningPlayer.PlayerId | Score: @winningPlayer.PlayerScore</p>
+                }
+                @if(!@running)
+                {
+                    <p>WINNER: @winningPlayer.PlayerId | Score: @winningPlayer.PlayerScore</p>
+                }
+            }
+        }
+    </div>
+    <div id="myGoalLine"></div>
     <div id ="myBucket" style=@bucketStyle></div>
     @if(players.Count > 0) {
         @foreach(var player in players)
         {
-            <div id="myPlayer" style=@player.PlayerStyle></div>
+            <div id="myPlayer" style=@player.PlayerStyle>
+                <p id="myPlayerText">@player.PlayerId</p>
+            </div>
         }
     }
-
+</div>
+<div id="myScoreBoard">
+        <table>
+            <tr>
+                <th>PlayerId</th>
+                <th>PlayerScored</th>
+                <th>PlayerScore</th>
+            </tr>
+        @if(players.Count > 0) {
+            @foreach(var player in players)
+            {
+                <tr>
+                    <td>@player.PlayerId</td>
+                    <td>@player.PlayerScored</td>
+                    <td>@player.PlayerScore</td>
+                </tr>
+            }
+        }
+        </table>
 </div>
 
 @code {
@@ -24,6 +58,7 @@
     string bucketStyle {get; set;}
     bool decreasing {get; set;}
     bool running {get; set;}
+    PlayerStuff winningPlayer {get; set;}
     List<PlayerStuff> players {get; set;}
 
     protected override async Task OnInitializedAsync()
@@ -32,6 +67,7 @@
         increment = 5;
         bucketPos = 0;
         bucketStyle = "bottom: 0; left: 0;";
+        winningPlayer = new PlayerStuff("default");
         players = new List<PlayerStuff>();
         await Task.Delay(0);
     }
@@ -50,6 +86,9 @@
             StateHasChanged();
             await Task.Delay(30);
         }
+        running = false;
+        calculateWinner();
+
     }
     public async Task playerMoveAsync() {
         PlayerStuff myPlayer = new PlayerStuff();
@@ -62,13 +101,23 @@
                 break;
             }
             if (players.Count > 0) {
-                checkCollision(myPlayer);
+                if (!myPlayer.PlayerScored) {
+                    checkCollision(myPlayer);
+                    calculateWinner();
+
+                }
+                if (myPlayer.PlayerScored) {
+                    myPlayer.PlayerStyle = "top: " + (400 - 48) + "px; left: " + ((bucketPos - 13) + myPlayer.PlayerScoredposOffset) + "px;";
+                }
+                else 
+                {
+                    myPlayer.PlayerStyle = string.Empty;
+                    calculatePlayerMove(myPlayer);
+                    myPlayer.PlayerStyle = "top: " + myPlayer.POSY + "px; left: " + myPlayer.POSX + "px;";
+                }
+                StateHasChanged();
+                await Task.Delay(30);
             }
-            myPlayer.PlayerStyle = string.Empty;
-            calculatePlayerMove(myPlayer);
-            myPlayer.PlayerStyle = "top: " + myPlayer.POSY + "px; left: " + myPlayer.POSX + "px;";
-            StateHasChanged();
-            await Task.Delay(30);
         }
     }
     private void calculatePlayerMove(PlayerStuff myPlayer) {
@@ -122,31 +171,96 @@
         {
             if (myPlayer.POSY + 25 >= 375 && myPlayer.POSY + 25 <= 380) 
             {
+                // Check if in contact with bucket
                 if (myPlayer.POSX + 13 == bucketPos + i)
                 {
-                    running = false;
+                    myPlayer.PlayerScoredposOffset = i;
+                    myPlayer.PlayerScored = true;
+                    calculatePlayerScore(myPlayer);
+                    break;
                 } 
             }
         }
     }
+    private void calculatePlayerScore(PlayerStuff myPlayer) {
+        var bucketCenter = 26;
+        var scorePercent = 0.00f;
+        if (myPlayer.PlayerScoredposOffset == 26) {
+            // perfect score
+            myPlayer.PlayerScore = 100;
+        } 
+        else if (myPlayer.PlayerScoredposOffset < 26)
+        {
+            scorePercent = (51.00f - (bucketCenter - myPlayer.PlayerScoredposOffset))/51.00f;
+            myPlayer.PlayerScore = (int)(scorePercent * 100.00f);
+        } 
+        else
+        {
+            scorePercent = (51.00f - (myPlayer.PlayerScoredposOffset - bucketCenter))/51.00f;
+            myPlayer.PlayerScore = (int)(scorePercent * 100.00f);
+        }
+    }
+    private void calculateWinner() 
+    {
+        if (players.Count > 0) {
+            players.ForEach(delegate(PlayerStuff player)
+            {
+                if(player.PlayerScored)
+                {
+                    if (winningPlayer.PlayerId == "default")
+                    {
+                        winningPlayer = player;
+                    }
+                    else 
+                    {
+                        if (winningPlayer.PlayerScore < player.PlayerScore)
+                        {
+                            winningPlayer = player;
+                        }
+                    }
+                }
+            });
 
+        }
+    }
     public class PlayerStuff
     {
         public int POSX {get; set;}
         public int POSY {get; set;}
         public int Speed {get; set;}
+        public int PlayerScore {get; set;}
+        public int PlayerScoredposOffset {get; set;}
         public bool PlayerFalling {get; set;}
         public bool PlayerFallingForward {get; set;}
-        public string PlayerStyle {get; set;}
+        public bool PlayerScored {get; set;}
 
+        public string PlayerStyle {get; set;}
+        public string PlayerId {get; set;}
+        
         public PlayerStuff()
         {
             Random random = new Random();
+            PlayerId = "Player" + random.Next(1, 50);
             POSX = random.Next(0, 375);
             POSY = 0;
             Speed = random.Next(3,10);
             PlayerFalling = true;
             PlayerFallingForward = true;
+            PlayerScore = 0;
+            PlayerScored = false;
+            PlayerStyle = "top: 0; left: " + POSX;
+        }
+        public PlayerStuff(string name)
+        {
+            Random random = new Random();
+            PlayerId = name;
+            POSX = random.Next(0, 375);
+            POSY = 0;
+            Speed = random.Next(3,10);
+            PlayerFalling = true;
+            PlayerFallingForward = true;
+            PlayerScore = 0;
+            PlayerScored = false;
             PlayerStyle = "top: 0; left: " + POSX;
         }
     }

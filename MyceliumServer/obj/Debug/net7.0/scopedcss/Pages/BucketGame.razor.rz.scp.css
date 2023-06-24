@@ -1,19 +1,54 @@
+table[b-n5k34vohmg], th[b-n5k34vohmg], td[b-n5k34vohmg] {
+  border: 1px solid;
+}
+
 #myGameArea[b-n5k34vohmg] {
-    width: 400px;
-    height: 400px;
-    position: relative;
-    background: yellow;
-  }
-  #myBucket[b-n5k34vohmg] {
-    width: 50px;
-    height: 25px;
-    position: absolute;
-    background-color: red;
-  }
-  #myPlayer[b-n5k34vohmg]{
-    width: 25px;
-    height: 26px;
-    position: absolute;
-    background-color: blue;
-    border-radius: 50px;
-  }
+  width: 400px;
+  height: 400px;
+  position: relative;
+  background: yellow;
+}
+#myGoalLine[b-n5k34vohmg] {
+  width: 400px;
+  height: 25px;
+  position: absolute;
+  bottom: 0px;
+  background-color: cyan;
+}
+
+#myBucket[b-n5k34vohmg] {
+  width: 51px;
+  height: 25px;
+  position: absolute;
+  background-color: red;
+}
+#myPlayer[b-n5k34vohmg]{
+  width: 25px;
+  height: 26px;
+  position: absolute;
+  background-color: blue;
+  border-radius: 50px;
+}
+#myPlayerText[b-n5k34vohmg] {
+  font-family: monospace;
+  text-align: center;
+  font-weight: bolder;
+  font-size: large;
+  color: green;
+}
+#myScoreBoard[b-n5k34vohmg] {
+  width: 200px;
+  height: 600px;
+  position: relative;
+  left: 450px;
+  top: -400px;
+}
+#winningPlayer[b-n5k34vohmg] {
+  position: relative;
+  top: 1em;
+  text-align: center;
+  font-size: x-large;
+  font-family: monospace;
+  color:  green;
+  font-weight: bolder;
+}
